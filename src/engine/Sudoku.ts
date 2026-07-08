@@ -9,7 +9,7 @@ export default class Sudoku {
   originalBoard: number[][] = [];
   currentBoard: number[][] = [];
   history: number[][][] = [];
-  historyIndex: number = 10;
+  historyIndex: number = 0;
   level: number = 0;
   
   constructor(level: number = 20) {
@@ -128,6 +128,17 @@ export default class Sudoku {
     this.history.push(this.deepCopyBoard(this.currentBoard));
     this.historyIndex++;
     this.currentBoard[row][col] = 0;
+  }
+
+  isCompleted(): boolean {
+    for (let row = 0; row < Sudoku.size; row++) {
+      for (let col = 0; col < Sudoku.size; col++) {
+        if (this.currentBoard[row][col] === 0) {
+          return false;
+        }
+      }
+    }
+    return true;
   }
 
   timer(): void {

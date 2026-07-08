@@ -1,12 +1,10 @@
 .board {
   display: flex;
   flex-direction: column;
-  gap: 2px;
 }
 
 .row {
   display: flex;
-  gap: 2px;
 }
 
 .cell {
@@ -18,9 +16,39 @@
   justify-content: center;
   cursor: pointer;
   background: white;
+  color: #000;
 }
 
 .cell.selected {
   background: #ffe082;
   border-color: #f9a825;
 }
+
+
+.board .cell:nth-child(3n + 1) {
+  border-left: 1px solid #555555;
+}
+.board .cell:nth-child(3n + 3) {
+  border-right: 1px solid #555555;
+}
+.row:nth-child(3n + 1) .cell {
+  border-top: 1px solid #555555;
+}
+.board .cell:nth-child(3n) {
+  border-right: 1px solid #555555;
+}
+.row:nth-child(3n) .cell {
+  border-bottom: 1px solid #555555;
+}
+
+/* .control-bar{
+  display: flex;
+  justify-content: space-between;
+} */
+.control-bar button{
+  margin: 5px;
+  padding: 10px;
+  font-size: 16px;
+  cursor: pointer;
+}
+

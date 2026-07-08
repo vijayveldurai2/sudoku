@@ -1,6 +1,7 @@
 import React from "react";
 import Sudoku from "../engine/Sudoku";
 import Keys from "./Keys";
+import ControlBar from "./ControlBar";
 
 type Value = {
   cellIndex: number;
@@ -17,10 +18,21 @@ export default function Board() {
   });
   const [selectedCell, setSelectedCell] = React.useState<string | null>(null);
   const sudoku = React.useMemo(() => new Sudoku(20), []);
+  const refreshBoard = () => {
+  setBoard(sudoku.currentBoard.map((row) => [...row]));
+};
+  const controls = [
+        { name: 'New Game', action: () => console.log('New Game') },
+        { name: 'Undo', action: () => {sudoku.undo(); refreshBoard(); } },
+       // { name: 'Redo', action: () => sudoku.redo() },
+        { name: 'Reset', action: () => {sudoku.reset(); refreshBoard(); } },
+        { name: 'Erase', action: () => {sudoku.eraseCell(value.rowIndex, value.cellIndex); refreshBoard(); } },
+    ];
+
 
   React.useEffect(() => {
     sudoku.initialize();
-    setBoard(sudoku.currentBoard.map((row) => [...row]));
+    refreshBoard();
   }, [sudoku]);
 
   React.useEffect(() => {
@@ -31,8 +43,11 @@ export default function Board() {
         value.value
       );
       if (updated) {
-        setBoard(sudoku.currentBoard.map((row) => [...row]));
+        refreshBoard();
       }
+    }
+    if (sudoku.isCompleted()) {
+      console.log("Sudoku is complete!");
     }
   }, [sudoku, value]);
   const handleCellClick = (rowIndex: number, cellIndex: number) => {
@@ -63,6 +78,7 @@ export default function Board() {
       console.log(`Key ${key} clicked`);
       setValue({ ...value, value: key });
     }} />
+    <ControlBar controls={controls} />
     </>
   );
 }
