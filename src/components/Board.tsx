@@ -14,7 +14,8 @@ export default function Board() {
     cellIndex: 0,
     rowIndex: 0,
     value: 0,
-  }); // refactor
+  });
+  const [selectedCell, setSelectedCell] = React.useState<string | null>(null);
   const sudoku = React.useMemo(() => new Sudoku(), []);
 
   React.useEffect(() => {
@@ -36,8 +37,9 @@ export default function Board() {
   }, [sudoku, value]);
   const handleCellClick = (rowIndex: number, cellIndex: number) => {
     setValue({ ...value, rowIndex, cellIndex });
+    setSelectedCell(`${rowIndex}-${cellIndex}`);
     console.log(`Cell clicked at row ${rowIndex}, column ${cellIndex}`);
-  }
+  };
   return (
     <>
     <div className="board">
@@ -45,11 +47,11 @@ export default function Board() {
         <div key={rowIndex} className="row">
           {row.map((cell, cellIndex) => (
             <div
-              className="cell"
+              className={`cell ${selectedCell === `${rowIndex}-${cellIndex}` ? "selected" : ""}`}
               key={cellIndex}
-                onClick={() => {
-                    handleCellClick(rowIndex, cellIndex);
-                }}
+              onClick={() => {
+                handleCellClick(rowIndex, cellIndex);
+              }}
             >
               {cell === 0 ? "" : cell}
             </div>
