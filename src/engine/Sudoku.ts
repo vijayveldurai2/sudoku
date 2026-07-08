@@ -1,7 +1,20 @@
+type Level = {
+  easy: number;
+  medium: number;
+  hard: number;
+};
+
 export default class Sudoku {
-  static size: number = 9;
-  boardArray: number[][] = [];
-  constructor() {}
+  static size: number = 9; // CONFIG
+  originalBoard: number[][] = [];
+  currentBoard: number[][] = [];
+  history: number[][][] = [];
+  historyIndex: number = 10;
+  level: number = 0;
+  
+  constructor(level: number = 20) {
+    this.level = level;
+  }
   generateBoard(): number[][] {
     const board: number[][] = [];
     for (let i = 0; i < Sudoku.size; i++) {
@@ -25,20 +38,20 @@ export default class Sudoku {
   }
   isValidElement(row: number, col: number, num: number): boolean {
     for (let x = 0; x < Sudoku.size; x++) {
-      if (this.boardArray[row][x] === num) {
+      if (this.currentBoard[row][x] === num) {
         return false;
       }
     }
     for (let x = 0; x < Sudoku.size; x++) {
-      if (this.boardArray[x][col] === num) {
+      if (this.currentBoard[x][col] === num) {
         return false;
       }
     }
-    const startRow = row - (row % Math.sqrt(Sudoku.size));
+    const startRow = row - (row % Math.sqrt(Sudoku.size)); // size should be from CONFIG
     const startCol = col - (col % Math.sqrt(Sudoku.size));
     for (let i = startRow; i < startRow + Math.sqrt(Sudoku.size); i++) {
       for (let j = startCol; j < startCol + Math.sqrt(Sudoku.size); j++) {
-        if (this.boardArray[i][j] === num) {
+        if (this.currentBoard[i][j] === num) {
           return false;
         }
       }
@@ -48,14 +61,14 @@ export default class Sudoku {
   solveSudoku(): boolean {
     for (let row = 0; row < Sudoku.size; row++) {
       for (let col = 0; col < Sudoku.size; col++) {
-        if (this.boardArray[row][col] === 0) {
+        if (this.originalBoard[row][col] === 0) {
           for (let num = 1; num <= Sudoku.size; num++) {
             if (this.isValidElement(row, col, num)) {
-              this.boardArray[row][col] = num;
+              this.originalBoard[row][col] = num;
               if (this.solveSudoku()) {
                 return true;
               }
-              this.boardArray[row][col] = 0;
+              this.originalBoard[row][col] = 0;
             }
           }
           return false;
@@ -67,10 +80,10 @@ export default class Sudoku {
   fillBoard(): void {
     let solved = false;
     while (!solved) {
-      this.boardArray = this.generateBoard();
+      this.originalBoard = this.generateBoard();
       const shuffled = this.shuffledNumbers();
       for (let col = 0; col < Sudoku.size; col++) {
-        this.boardArray[0][col] = shuffled[col];
+        this.originalBoard[0][col] = shuffled[col];
       }
       solved = this.solveSudoku();
     }
@@ -80,22 +93,57 @@ export default class Sudoku {
     while (removed < count) {
       const row = Math.floor(Math.random() * Sudoku.size);
       const col = Math.floor(Math.random() * Sudoku.size);
-      if (this.boardArray[row][col] !== 0) {
-        this.boardArray[row][col] = 0;
+      if (this.originalBoard[row][col] !== 0) {
+        this.originalBoard[row][col] = 0;
         removed++;
       }
     }
   }
   updateCell(row: number, col: number, num: number): boolean {
     if (this.isValidElement(row, col, num)) {
-      this.boardArray[row][col] = num;
+      this.history = this.history.slice(0, this.historyIndex + 1);
+      this.history.push(this.deepCopyBoard(this.currentBoard));
+      this.historyIndex++;
+      this.currentBoard[row][col] = num;
       return true;
     }
     return false;
   }
 
+  undo(): void {
+    if (this.historyIndex > 0) {
+      this.historyIndex--;
+      this.currentBoard = this.deepCopyBoard(this.history[this.historyIndex]);
+    }
+  }
+
+  reset(): void {
+    this.currentBoard = this.deepCopyBoard(this.originalBoard);
+    this.history = [];
+    this.historyIndex = 0;
+  }
+
+  eraseCell(row: number, col: number): void {
+    this.history = this.history.slice(0, this.historyIndex + 1);
+    this.history.push(this.deepCopyBoard(this.currentBoard));
+    this.historyIndex++;
+    this.currentBoard[row][col] = 0;
+  }
+
+  timer(): void {
+    // Implement timer logic here
+  }
+
+  rank(): void {
+    // Implement ranking logic here
+  }
+
+  private deepCopyBoard(board: number[][]): number[][] {
+    return board.map((row) => [...row]);
+  }
+
   initialize(): void {
     this.fillBoard();
-    this.removeElements(20);
+    this.removeElements(this.level); // Default to easy level
   }
 }

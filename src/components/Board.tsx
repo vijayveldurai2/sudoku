@@ -16,11 +16,11 @@ export default function Board() {
     value: 0,
   });
   const [selectedCell, setSelectedCell] = React.useState<string | null>(null);
-  const sudoku = React.useMemo(() => new Sudoku(), []);
+  const sudoku = React.useMemo(() => new Sudoku(20), []);
 
   React.useEffect(() => {
     sudoku.initialize();
-    setBoard(sudoku.boardArray.map((row) => [...row]));
+    setBoard(sudoku.currentBoard.map((row) => [...row]));
   }, [sudoku]);
 
   React.useEffect(() => {
@@ -31,7 +31,7 @@ export default function Board() {
         value.value
       );
       if (updated) {
-        setBoard(sudoku.boardArray.map((row) => [...row]));
+        setBoard(sudoku.currentBoard.map((row) => [...row]));
       }
     }
   }, [sudoku, value]);
