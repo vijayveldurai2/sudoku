@@ -1,46 +1,66 @@
-import React from 'react'
-import Sudoku from '../engine/Sudoku';
+import React from "react";
+import Sudoku from "../engine/Sudoku";
+import Keys from "./Keys";
 
 type Value = {
-    cellIndex: number;
-    rowIndex: number;
-    value: number;
-}
+  cellIndex: number;
+  rowIndex: number;
+  value: number;
+};
 
 export default function Board() {
-    const [board, setBoard] = React.useState<number[][]>([]);
-    const [value, setValue] = React.useState<Value | null>(null);
-    const sudoku = new Sudoku();
+  const [board, setBoard] = React.useState<number[][]>([]);
+  const [value, setValue] = React.useState<Value>({
+    cellIndex: 0,
+    rowIndex: 0,
+    value: 0,
+  }); // refactor
+  const sudoku = React.useMemo(() => new Sudoku(), []);
+
+  React.useEffect(() => {
     sudoku.initialize();
-    React.useEffect(() => {
-        setBoard(sudoku.boardArray);
-    }, []);
-    React.useEffect(() => {
-        const test = sudoku.isValidElement(value?.rowIndex || 0, value?.cellIndex || 0, value?.value || 0);
-        console.log(test);
-    }, [value])
+    setBoard(sudoku.boardArray.map((row) => [...row]));
+  }, [sudoku]);
+
+  React.useEffect(() => {
+    if (value.value !== 0) {
+      const updated = sudoku.updateCell(
+        value.rowIndex,
+        value.cellIndex,
+        value.value
+      );
+      if (updated) {
+        setBoard(sudoku.boardArray.map((row) => [...row]));
+      }
+    }
+  }, [sudoku, value]);
+  const handleCellClick = (rowIndex: number, cellIndex: number) => {
+    setValue({ ...value, rowIndex, cellIndex });
+    console.log(`Cell clicked at row ${rowIndex}, column ${cellIndex}`);
+  }
   return (
-    <div>
-        {board.map((row, rowIndex) => (
-            <div key={rowIndex} style={{ display: 'flex' }}>
-                {row.map((cell, cellIndex) => (
-                    <div
-                        contentEditable
-                        suppressContentEditableWarning
-                        key={cellIndex}
-                        style={{ width: '40px', height: '40px', border: '1px solid black', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
-                        onInput={(e) => {
-                            const newValue = e.currentTarget.textContent;
-                            if (newValue && !isNaN(parseInt(newValue)) && parseInt(newValue) >= 1 && parseInt(newValue) <= 9) {
-                                setValue({ cellIndex, rowIndex, value: parseInt(newValue) });
-                            }
-                        }}
-                    >
-                        {cell === 0 ? '' : cell}
-                    </div>
-                ))}
+    <>
+    <div className="board">
+      {board.map((row, rowIndex) => (
+        <div key={rowIndex} className="row">
+          {row.map((cell, cellIndex) => (
+            <div
+              className="cell"
+              key={cellIndex}
+                onClick={() => {
+                    handleCellClick(rowIndex, cellIndex);
+                }}
+            >
+              {cell === 0 ? "" : cell}
             </div>
-        ))}
+          ))}
+        </div>
+      ))}
     </div>
-  )
+    <Keys setSelectedKey={(key) => {
+      console.log(`Key ${key} clicked`);
+      setValue({ ...value, value: key });
+    }} />
+    </>
+  );
 }
