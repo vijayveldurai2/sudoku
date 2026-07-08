@@ -36,14 +36,14 @@ export default class Sudoku {
     }
     return numbers;
   }
-  isValidElement(row: number, col: number, num: number): boolean {
+  isValidElement(row: number, col: number, num: number, board: number[][]): boolean {
     for (let x = 0; x < Sudoku.size; x++) {
-      if (this.currentBoard[row][x] === num) {
+      if (board[row][x] === num) {
         return false;
       }
     }
     for (let x = 0; x < Sudoku.size; x++) {
-      if (this.currentBoard[x][col] === num) {
+      if (board[x][col] === num) {
         return false;
       }
     }
@@ -51,7 +51,7 @@ export default class Sudoku {
     const startCol = col - (col % Math.sqrt(Sudoku.size));
     for (let i = startRow; i < startRow + Math.sqrt(Sudoku.size); i++) {
       for (let j = startCol; j < startCol + Math.sqrt(Sudoku.size); j++) {
-        if (this.currentBoard[i][j] === num) {
+        if (board[i][j] === num) {
           return false;
         }
       }
@@ -63,7 +63,7 @@ export default class Sudoku {
       for (let col = 0; col < Sudoku.size; col++) {
         if (this.originalBoard[row][col] === 0) {
           for (let num = 1; num <= Sudoku.size; num++) {
-            if (this.isValidElement(row, col, num)) {
+            if (this.isValidElement(row, col, num, this.originalBoard)) {
               this.originalBoard[row][col] = num;
               if (this.solveSudoku()) {
                 return true;
@@ -100,7 +100,7 @@ export default class Sudoku {
     }
   }
   updateCell(row: number, col: number, num: number): boolean {
-    if (this.isValidElement(row, col, num)) {
+    if (this.isValidElement(row, col, num, this.currentBoard)) {
       this.history = this.history.slice(0, this.historyIndex + 1);
       this.history.push(this.deepCopyBoard(this.currentBoard));
       this.historyIndex++;
@@ -143,6 +143,7 @@ export default class Sudoku {
   }
 
   initialize(): void {
+    this.currentBoard = this.deepCopyBoard(this.originalBoard);
     this.fillBoard();
     this.removeElements(this.level); // Default to easy level
   }
