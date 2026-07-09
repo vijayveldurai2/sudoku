@@ -11,7 +11,15 @@ export default class Sudoku {
   history: number[][][] = [];
   historyIndex: number = 0;
   level: number = 0;
-  
+  levels: Level = {
+    easy: 35,
+    medium: 45,
+    hard: 55
+  };
+  completedDuration: number = 0; // in seconds
+  totalHintsUsed: number = 0;
+  totalMistakesMade: number = 0;
+  availableHints: number = 5; // Default number of hints available
   constructor(level: number = 20) {
     this.level = level;
   }
@@ -140,13 +148,32 @@ export default class Sudoku {
     }
     return true;
   }
-
-  timer(): void {
-    // Implement timer logic here
+  giveHint(): { row: number; col: number; num: number } | null {
+    if (this.availableHints <= 0) {
+      return null; // No hints available
+    }
+    for (let row = 0; row < Sudoku.size; row++) {
+      for (let col = 0; col < Sudoku.size; col++) {
+        if (this.currentBoard[row][col] === 0) {
+          const correctNum = this.originalBoard[row][col];
+          this.updateCell(row, col, correctNum);
+          this.availableHints--;
+          this.totalHintsUsed++;
+          return { row, col, num: correctNum };
+        }
+      }
+    }
+    return null;
   }
 
-  rank(): void {
-    // Implement ranking logic here
+  calculateScore(): number {
+    const baseScore = 1000;
+    const hintPenalty = this.totalHintsUsed * 10;
+    const mistakePenalty = this.totalMistakesMade * 5;
+    const timeBonus = Math.max(0, 100 - this.completedDuration); // Bonus for completing quickly
+    const levelBonus = this.level * 5; // Reward harder levels more
+
+    return baseScore + levelBonus - hintPenalty - mistakePenalty + timeBonus;
   }
 
   private deepCopyBoard(board: number[][]): number[][] {
