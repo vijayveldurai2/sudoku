@@ -141,7 +141,7 @@ export default class Sudoku {
   isCompleted(): boolean {
     for (let row = 0; row < Sudoku.size; row++) {
       for (let col = 0; col < Sudoku.size; col++) {
-        if (this.currentBoard[row][col] === 0) {
+        if (this.currentBoard.length && this.currentBoard[row][col] === 0) {
           return false;
         }
       }
